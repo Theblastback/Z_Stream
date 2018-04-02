@@ -11,4 +11,3 @@ Note, for my version of SDL Mixer, only wav files seem to work. MP3s will not wo
 
 See instructions folder for table of premade key bindings.
 
-- Mitchell Zarnoch
