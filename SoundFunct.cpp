@@ -1,66 +1,144 @@
 #include "SoundFunct.h"
+#include <iostream>
 
-void SoundFunct :: InitAll() {
-	Sound = NULL;
-	memset(&SearchData, 0, sizeof(WIN32_FIND_DATA));
-	File = NULL;	
+using namespace std;
+
+
+
+void SoundFunct :: init_all() {
+	this->sound = NULL;
+	memset(&this->search_data, 0, sizeof(WIN32_FIND_DATA));
+	this->file = NULL;
+	this->lib_chosen = 0;
+
+	// Initializing the library array
+	this->size = 0;
+	this->handle = FindFirstFile(".\\Libraries\\*", &this->search_data);
+
+	while (this->handle != INVALID_HANDLE_VALUE) { // Does the measuring of how many songs are in the directory
+		if (strcmp(".", this->search_data.cFileName) && strcmp("..", this->search_data.cFileName) ) {
+			size++;
+		}
+		if (FindNextFile(this->handle, &this->search_data) == FALSE)
+			break;
+	}
+	CloseHandle(this->handle);
+	this->lib_total = this->size;
+
+	// Filling the library array
+	this->libraries = (char **)malloc(sizeof(char *) * this->lib_total);
+
+	for (short index = 0; index < this->lib_total; index++)
+		this->libraries[index] = (char *)malloc(sizeof(char) * MAX_PATH);
+
+	this->search_param = (char *)malloc(sizeof(MAX_PATH));
+
+	this->handle = FindFirstFile(".\\Libraries\\*", &this->search_data);
+	while (this->handle != INVALID_HANDLE_VALUE) { // Does the measuring of how many songs are in the directory
+		if (strcmp(".", this->search_data.cFileName) && strcmp("..", this->search_data.cFileName)) {
+
+			strcpy(this->libraries[this->lib_chosen], ".\\Libraries\\");
+
+			strcat(this->libraries[this->lib_chosen], this->search_data.cFileName);
+			strcat(this->libraries[this->lib_chosen], "/");
+
+
+			this->lib_chosen++;
+		}
+		if (FindNextFile(this->handle, &this->search_data) == FALSE)
+			break;
+	}
+
+	this->lib_chosen = 0;
+
+	strcpy(this->search_param, this->libraries[this->lib_chosen]);
+	strcat(this->search_param, "*");
+
+	this->get_size();
 }
 
+void SoundFunct :: change_library() {
+	this->lib_chosen = (this->lib_chosen + 1) % this->lib_total;
 
-void SoundFunct :: PlayNoise(char *Path) {
-	Sound = Mix_LoadMUS(Path);
-	if (Sound == NULL) // No point in proceeding if sound cannot be obtained to play
+	strcpy(this->search_param, this->libraries[this->lib_chosen]);
+	strcat(this->search_param, "*");
+
+	this->clear_noise();
+
+	this->get_size();
+}
+
+void SoundFunct :: play_noise() {
+	this->get_song();
+	this->sound = Mix_LoadMUS(this->file);
+	if (this->sound == NULL) // No point in proceeding if sound cannot be obtained to play
 		return;
 
-	Mix_PlayMusic(Sound, 0); // Play the sound, and loop '0' times
+	Mix_PlayMusic(this->sound, 0); // Play the sound, and loop '0' times
 }
 
 
-void SoundFunct :: ClearNoise() {
+void SoundFunct :: clear_noise() {
 	// Must check these as, through testing, these would often not be allocated to begin with
-	if (Sound != NULL) {
-		Mix_FreeMusic(Sound);
-		Sound = NULL;
+	if (this->sound != NULL) {
+		Mix_FreeMusic(this->sound);
+		this->sound = NULL;
 	}
-	if (File != NULL) {
-		free(File);
-		File = NULL;
+	if ( this->file != NULL ) {
+		free(this->file);
+		this->file = NULL;
 	}
 }
 
-void SoundFunct :: GetSize() {
-	Size = 0; // Zero out the size of the directory
+void SoundFunct :: get_size() {
+	this->size = 0; // Zero out the size of the directory
+
 
 	srand((unsigned int)time(NULL));
 
-	Handle = FindFirstFile("c:\\Users\\Mpzar_000\\Documents\\Auto-Music\\Music\\*", &SearchData); // The directory being searched is arbitrary. Can be swapped with any directory that your songs are located in
 
-	while (Handle != INVALID_HANDLE_VALUE) { // Does the measuring of how many songs are in the directory
-		Size++;
-		if (FindNextFile(Handle, &SearchData) == FALSE)
+	handle = FindFirstFile(this->search_param, &this->search_data); // The directory being searched is arbitrary. Can be swapped with any directory that your songs are located in
+
+	while (this->handle != INVALID_HANDLE_VALUE) { // Does the measuring of how many songs are in the directory
+		this->size++;
+		if (FindNextFile(this->handle, &this->search_data) == FALSE)
 			break;
 	}
-	CloseHandle(Handle);
+	CloseHandle(this->handle);
 }
 
-char * SoundFunct :: GetSong() {
-	File = (char*) malloc(sizeof(char)*100);
-	int Index;
+void SoundFunct :: get_song() {
+	short int index;
+	this->file = (char *)malloc(sizeof(char) * (MAX_PATH + MAX_PATH));
 
 
-	Index = rand() % Size; // Randomly selects song
+	this->get_size();
 
-	Handle = FindFirstFile(".\\Music\\*", &SearchData);
+	index = rand() % this->size; // Randomly selects song
 
-	while ( (Handle != INVALID_HANDLE_VALUE) && (Index > 1) ) { // Goes to the song, and pretty much selects it
-		Index--;
-		if (FindNextFile(Handle, &SearchData) == FALSE)
+
+	this->handle = FindFirstFile(search_param, &search_data);
+
+	while ( (this->handle != INVALID_HANDLE_VALUE) && (index > 1) ) { // Goes to the song, and pretty much selects it
+		if (strcmp(".", this->search_data.cFileName) && strcmp("..", this->search_data.cFileName))
+			index--;
+		if (FindNextFile(this->handle, &this->search_data) == FALSE)
 			break;
+
 	}
 
-	strcpy(File, ".\\Music\\"); // Directory is based off of the auto music directory, so I gotta add this in front of the song file's name
-	strcat(File, SearchData.cFileName); 
+	strcpy(this->file, this->libraries[this->lib_chosen]); // Errors here
+	strcat(this->file, this->search_data.cFileName);
 
-	CloseHandle(Handle);
-	return(File);
+	CloseHandle(this->handle);
+}
+
+void SoundFunct::free_library() {
+	short index;
+	for (index = 0; index < this->lib_total; index++) {
+		free(this->libraries[index]);
+	}
+	free(this->libraries);
+	free(this->file);
+	free(this->search_param);
 }
