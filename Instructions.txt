@@ -1,0 +1,9 @@
+USAGE:
+            |   RIGHT SHIFT  |   RIGHT CTRL  |
+            |--------------------------------|
+UP ARROW    | Pause/play     | Unused*       |
+DOWN ARROW  | Exit program   | Unused*       |
+LEFT ARROW  | Play new song  | Unused*       |
+RIGHT ARROW | New lib & song | Unused*       |
+
+* Future implementations will use these key combinations for new features
