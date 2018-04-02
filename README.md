@@ -9,12 +9,6 @@ The path to the song from the executing directory should be
 
 Note, for my version of SDL Mixer, only wav files seem to work. MP3s will not work with the precompiled executable
 
-USAGE:
-            |   RIGHT SHIFT  |   RIGHT CTRL  |
-            |--------------------------------|
-UP ARROW    | Pause/play     | Unused*       |
-DOWN ARROW  | Exit program   | Unused*       |
-LEFT ARROW  | Play new song  | Unused*       |
-RIGHT ARROW | New lib & song | Unused*       |
+See instructions folder for table of premade key bindings.
 
-* Future implementations will use these key combinations for new features
+- Mitchell Zarnoch
