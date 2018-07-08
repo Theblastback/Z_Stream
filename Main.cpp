@@ -10,6 +10,7 @@ int main(int argc, char **argv) {
 	unsigned char toggle; // Will serve as the exit statement for the main loop, and potentially as a check to see if SDL was initialized
 	short int total = 0; // Total songs located in directory
 	SoundFunct function; // This allows access to the functions inside the ImageFunct class
+	
 
 
 	if (((toggle = SDL_Init(SDL_INIT_AUDIO)) != -1) && (Mix_OpenAudio(22050, MIX_DEFAULT_FORMAT, 2, 4096) != -1)) {
@@ -33,9 +34,17 @@ int main(int argc, char **argv) {
 					SDL_Delay(1000);
 				} else if ( (GetAsyncKeyState(VK_DOWN) & 0X8000) > 0) { // End sequence
 					toggle = 0;
-				} else if ((GetAsyncKeyState(VK_RIGHT) & 0x8000) > 0) { // Change libraries
+				} else if ( (GetAsyncKeyState(VK_RIGHT) & 0x8000) > 0) { // Change libraries
 					function.change_library();
 					SDL_Delay(1000);
+				}
+			} else if ( ((GetAsyncKeyState(VK_RCONTROL) & 0x8000) > 0) || ((toggle | Mix_PlayingMusic()) == 2) ) {
+				if ( (GetAsyncKeyState(VK_UP) & 0x8000) > 0) { // Volume up
+					Mix_VolumeMusic(Mix_VolumeMusic(-1) + 8);
+					SDL_Delay(500);
+				} else if ( (GetAsyncKeyState(VK_DOWN) & 0x8000) > 0) {
+					Mix_VolumeMusic(Mix_VolumeMusic(-1) - 8);
+					SDL_Delay(500);
 				}
 			}
 			SDL_Delay(1);
