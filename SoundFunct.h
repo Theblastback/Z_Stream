@@ -12,31 +12,35 @@
 #include <time.h>
 
 #include <vector>
+#include <list>
 
 class SoundFunct {
 public:
 	void play_noise();
 	void clear_noise();	// Clear noise just removes the current song that's playing and deallocs it
 	void init_all();
-	void get_size();
 	void change_library();
 	void free_library();
+	void load_song_list();
 
 private:
+
 	void get_song();
 
 	Mix_Music	*	sound;
-	short int		size;
 
 	short int		lib_chosen;
-	short int		lib_total;
+
+	std::vector<char> list;
 
 	HANDLE		handle;
 	WIN32_FIND_DATA	search_data;
 
-	char		**	libraries;
+	std::vector<char *>	libraries_list;
+	std::vector<char *>	song_list;
+	std::list<int>	past_songs;
 	char		*	search_param;
-	char		*	file;
+	std::string	file;
 };
 
 
